@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Great Carb MythBusters</title>
+  <style>
+    :root {
+      --card:#ffffff;
+      --ink:#222;
+      --muted:#5f6368;
+      --primary:#b23a48;
+      --primary-light:#fdecef;
+      --secondary:#1f7a8c;
+      --secondary-light:#e4f7fa;
+      --accent:#7b2cbf;
+      --accent-light:#f1e7fb;
+      --success:#2e7d32;
+      --success-light:#e9f6ea;
+      --warning:#b26a00;
+      --warning-light:#fff2de;
+      --danger:#b42318;
+      --danger-light:#fdecec;
+      --border:#d8dde3;
+      --radius:18px;
+      --shadow:0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(135deg,#fff6f7 0%,#edf8fa 100%);
+      color:var(--ink);
+      line-height:1.5;
+    }
+
+    .app { max-width:1200px; margin:0 auto; padding:24px; }
+
+    .hero,.card {
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .hero { padding:30px; margin-bottom:20px; }
+    .card { padding:22px; margin-bottom:20px; }
+
+    h1,h2,h3 { margin-top:0; line-height:1.15; }
+    h1 { color:var(--primary); font-size:clamp(2rem,3vw,3.2rem); margin-bottom:10px; }
+    .subtitle { color:var(--muted); max-width:900px; font-size:1.05rem; }
+
+    .badge-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    .badge { background:var(--primary-light); color:var(--primary); padding:8px 12px; border-radius:999px; font-weight:700; font-size:.9rem; }
+
+    .grid { display:grid; grid-template-columns:1fr; gap:20px; }
+    @media (min-width:950px) { .grid.two { grid-template-columns:360px 1fr; } }
+
+    .claim-list { display:grid; gap:10px; }
+
+    button,.choice {
+      border:2px solid var(--border);
+      background:#fff;
+      color:var(--ink);
+      padding:12px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:1rem;
+      font-weight:700;
+      text-align:left;
+      transition:transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+
+    button:hover,.choice:hover { transform:translateY(-1px); border-color:var(--primary); background:var(--primary-light); }
+    .choice.selected { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .primary-btn { background:var(--primary); color:#fff; border-color:var(--primary); text-align:center; }
+    .secondary-btn { background:var(--secondary); color:#fff; border-color:var(--secondary); text-align:center; }
+    .ghost-btn { background:#fff; color:var(--primary); border-color:var(--primary); text-align:center; }
+
+    .stepper { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .step-dot { padding:8px 10px; border-radius:999px; border:1px solid var(--border); background:#fff; font-weight:800; color:var(--muted); }
+    .step-dot.active { background:var(--secondary); color:#fff; border-color:var(--secondary); }
+    .step-dot.complete { background:var(--success); color:#fff; border-color:var(--success); }
+
+    .callout { border-left:8px solid var(--warning); background:var(--warning-light); padding:16px; border-radius:var(--radius); margin-top:16px; }
+    .info { border-left:8px solid var(--secondary); background:var(--secondary-light); padding:16px; border-radius:var(--radius); margin-bottom:16px; }
+
+    .hidden { display:none !important; }
+    .small-note { color:var(--muted); font-size:.92rem; }
+
+    textarea,input,select {
+      width:100%;
+      border:2px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      font-size:1rem;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    textarea { min-height:120px; resize:vertical; }
+    label { display:block; font-weight:800; margin:16px 0 6px; }
+
+    .verdict-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:12px; }
+    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+
+    .mini-card { background:#fafafa; border:1px solid var(--border); border-radius:16px; padding:16px; }
+    .mini-card h3 { color:var(--secondary); margin-bottom:8px; }
+
+    .feedback { margin-top:18px; padding:18px; border-radius:var(--radius); border:1px solid var(--border); display:none; }
+    .feedback.show { display:block; }
+    .feedback.good { background:var(--success-light); border-color:#badfbd; }
+    .feedback.warning { background:var(--warning-light); border-color:#ffd7a1; }
+    .feedback.info { background:var(--accent-light); border-color:#d5c0ef; }
+    .feedback.danger { background:var(--danger-light); border-color:#f1b8b4; }
+
+    .meter { height:18px; background:#eee; border:1px solid #d0d0d0; border-radius:999px; overflow:hidden; }
+    .meter-fill { height:100%; width:0%; background:var(--secondary); transition:width .4s ease; }
+
+    .action-row { display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
+    pre { white-space:pre-wrap; background:#fafafa; border:1px solid var(--border); padding:16px; border-radius:14px; overflow-x:auto; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <h1>The Great Carb MythBusters™</h1>
+      <p class="subtitle">Investigate a carbohydrate claim, separate marketing from physiology, evaluate evidence quality, and make a science-based verdict.</p>
+      <div class="badge-row">
+        <span class="badge">Added Sugars</span>
+        <span class="badge">Natural Sugars</span>
+        <span class="badge">Whole Grains</span>
+        <span class="badge">Glycemic Response</span>
+        <span class="badge">Low-Carb Diets</span>
+        <span class="badge">Science Literacy</span>
+      </div>
+    </section>
+
+    <div class="grid two">
+      <aside class="card">
+        <h2>Investigation Progress</h2>
+        <div class="stepper" id="stepper"></div>
+        <div class="callout">
+          <strong>Goal:</strong> Do not simply say whether the claim is true or false. Explain the mechanism and the nuance.
+        </div>
+        <div class="mini-card" style="margin-top:16px;">
+          <h3>Final PDF must include:</h3>
+          <ul>
+            <li>Claim selected</li>
+            <li>Why people believe it</li>
+            <li>Physiology/mechanism</li>
+            <li>Evidence quality rating</li>
+            <li>Final verdict</li>
+            <li>Student-created myth correction</li>
+          </ul>
+        </div>
+      </aside>
+
+      <section class="card">
+        <div id="screen1">
+          <h2>Step 1: Choose a Claim to Investigate</h2>
+          <p class="small-note">Choose one claim. The activity will guide you through the investigation.</p>
+          <div class="claim-list" id="claimList"></div>
+          <label for="customClaim">Optional custom claim approved by instructor</label>
+          <input id="customClaim" placeholder="Example: Carbs after 8 PM turn into fat." />
+          <div class="action-row">
+            <button class="primary-btn" id="startBtn">Start Investigation</button>
+          </div>
+        </div>
+
+        <div id="screen2" class="hidden">
+          <h2>Step 2: Why Does This Claim Sound Convincing?</h2>
+          <div class="info"><strong id="selectedClaimDisplay"></strong></div>
+          <label for="beliefReason">Explain why a person might believe this claim.</label>
+          <textarea id="beliefReason" placeholder="Think about social media, marketing, personal experience, diet culture, fear-based messaging, or oversimplified science."></textarea>
+
+          <label for="misleadingPart">What part of the claim may be oversimplified or misleading?</label>
+          <textarea id="misleadingPart" placeholder="Identify what the claim leaves out, exaggerates, or confuses."></textarea>
+
+          <div class="action-row">
+            <button class="secondary-btn" id="toMechanismBtn">Continue to Physiology</button>
+          </div>
+        </div>
+
+        <div id="screen3" class="hidden">
+          <h2>Step 3: Mechanism Check</h2>
+          <p>Choose the physiology concepts that are most relevant to your claim.</p>
+          <div class="evidence-grid" id="conceptGrid"></div>
+
+          <label for="mechanismExplanation">Explain the biological mechanism in your own words.</label>
+          <textarea id="mechanismExplanation" placeholder="Use course concepts such as digestion, absorption, insulin, glycogen, fiber, liver metabolism, glycemic response, or energy balance."></textarea>
+
+          <div class="action-row">
+            <button class="secondary-btn" id="toEvidenceBtn">Continue to Evidence</button>
+          </div>
+        </div>
+
+        <div id="screen4" class="hidden">
+          <h2>Step 4: Evidence Quality Check</h2>
+          <p>Rate the type of support you would need before accepting this claim.</p>
+
+          <label for="evidenceSource">Which source would be strongest for evaluating this claim?</label>
+          <select id="evidenceSource">
+            <option value="">Choose one</option>
+            <option value="peer-reviewed systematic review or major health organization guidance">Peer-reviewed systematic review or major health organization guidance</option>
+            <option value="single scientific study">Single scientific study</option>
+            <option value="registered dietitian explanation with sources">Registered dietitian explanation with sources</option>
+            <option value="influencer or personal testimony">Influencer or personal testimony</option>
+            <option value="food company marketing">Food company marketing</option>
+          </select>
+
+          <label for="evidenceRating">Evidence quality rating</label>
+          <select id="evidenceRating">
+            <option value="">Choose one</option>
+            <option value="strong">Strong</option>
+            <option value="moderate">Moderate</option>
+            <option value="weak">Weak</option>
+            <option value="not enough information">Not enough information</option>
+          </select>
+
+          <label for="evidenceReason">Explain your evidence rating.</label>
+          <textarea id="evidenceReason" placeholder="Explain what kind of evidence would make this claim stronger or weaker."></textarea>
+
+          <div class="action-row">
+            <button class="secondary-btn" id="toVerdictBtn">Continue to Verdict</button>
+          </div>
+        </div>
+
+        <div id="screen5" class="hidden">
+          <h2>Step 5: Final Verdict</h2>
+          <p>Classify the claim using the best scientific answer.</p>
+          <div class="verdict-grid" id="verdictGrid"></div>
+
+          <label for="verdictReason">Justify your verdict.</label>
+          <textarea id="verdictReason" placeholder="Explain why the claim is accurate, false, misleading, or partly true. Include nuance."></textarea>
+
+          <label for="correctedClaim">Rewrite the claim as a more accurate science-based message.</label>
+          <textarea id="correctedClaim" placeholder="Example: Instead of 'fruit sugar is bad,' a more accurate message is..."></textarea>
+
+          <div class="action-row">
+            <button class="primary-btn" id="summaryBtn">Generate Submission Summary</button>
+            <button class="secondary-btn hidden" id="pdfBtn">Download/Save PDF</button>
+          </div>
+
+          <div id="summaryOutput" class="hidden">
+            <h3>Canvas Submission Summary</h3>
+            <pre id="summaryText"></pre>
+          </div>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    'use strict';
+
+    const claims = [
+      'Sugar causes diabetes.',
+      'Fruit has too much sugar to be healthy.',
+      'Brown sugar is healthier than white sugar.',
+      'Honey is healthy because it is natural.',
+      'Carbs make people gain weight.',
+      'Low-carb diets are always healthier.',
+      'Whole wheat bread is always healthy.',
+      'Artificial sweeteners are toxic.',
+      'High-fructose corn syrup is worse than regular sugar.'
+    ];
+
+    const concepts = [
+      'Digestion and absorption',
+      'Insulin and blood glucose regulation',
+      'Glycogen storage',
+      'Energy balance/calorie intake',
+      'Fiber and slowed digestion',
+      'Added vs natural sugars',
+      'Whole vs refined grains',
+      'Glycemic response',
+      'Diabetes risk and insulin resistance',
+      'Liver metabolism'
+    ];
+
+    const verdicts = ['Supported', 'Partially true', 'Misleading', 'False', 'Not enough evidence'];
+
+    const state = {
+      step: 1,
+      selectedClaim: '',
+      selectedConcepts: [],
+      verdict: ''
+    };
+
+    const stepper = document.getElementById('stepper');
+    const claimList = document.getElementById('claimList');
+    const conceptGrid = document.getElementById('conceptGrid');
+    const verdictGrid = document.getElementById('verdictGrid');
+    const feedback = document.getElementById('feedback');
+    const summaryOutput = document.getElementById('summaryOutput');
+    const summaryText = document.getElementById('summaryText');
+    const pdfBtn = document.getElementById('pdfBtn');
+
+    function renderStepper() {
+      stepper.innerHTML = '';
+      ['Claim','Belief','Mechanism','Evidence','Verdict'].forEach((label,index) => {
+        const stepNum = index + 1;
+        const dot = document.createElement('div');
+        dot.className = 'step-dot';
+        if (state.step === stepNum) dot.classList.add('active');
+        if (state.step > stepNum) dot.classList.add('complete');
+        dot.textContent = stepNum + '. ' + label;
+        stepper.appendChild(dot);
+      });
+    }
+
+    function renderClaims() {
+      claimList.innerHTML = '';
+      claims.forEach((claim) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice';
+        btn.textContent = claim;
+        btn.addEventListener('click', () => {
+          state.selectedClaim = claim;
+          document.querySelectorAll('#claimList .choice').forEach((item) => item.classList.remove('selected'));
+          btn.classList.add('selected');
+        });
+        claimList.appendChild(btn);
+      });
+    }
+
+    function renderConcepts() {
+      conceptGrid.innerHTML = '';
+      concepts.forEach((concept) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice';
+        btn.textContent = concept;
+        btn.addEventListener('click', () => {
+          const index = state.selectedConcepts.indexOf(concept);
+          if (index === -1) {
+            state.selectedConcepts.push(concept);
+            btn.classList.add('selected');
+          } else {
+            state.selectedConcepts.splice(index,1);
+            btn.classList.remove('selected');
+          }
+        });
+        conceptGrid.appendChild(btn);
+      });
+    }
+
+    function renderVerdicts() {
+      verdictGrid.innerHTML = '';
+      verdicts.forEach((verdict) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice';
+        btn.textContent = verdict;
+        btn.addEventListener('click', () => {
+          state.verdict = verdict;
+          document.querySelectorAll('#verdictGrid .choice').forEach((item) => item.classList.remove('selected'));
+          btn.classList.add('selected');
+        });
+        verdictGrid.appendChild(btn);
+      });
+    }
+
+    function showScreen(step) {
+      state.step = step;
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById('screen' + i).classList.toggle('hidden', i !== step);
+      }
+      renderStepper();
+      feedback.className = 'feedback';
+      feedback.innerHTML = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showFeedback(style, title, text) {
+      feedback.className = 'feedback show ' + style;
+      feedback.innerHTML = '<h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(text) + '</p>';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function requireText(id, minLength, message) {
+      const value = getValue(id);
+      if (value.length < minLength) {
+        showFeedback('warning', 'More detail needed.', message);
+        return false;
+      }
+      return true;
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      const customClaim = getValue('customClaim');
+      if (customClaim) state.selectedClaim = customClaim;
+      if (!state.selectedClaim) {
+        showFeedback('warning', 'Choose a claim first.', 'Select one claim or enter an instructor-approved custom claim.');
+        return;
+      }
+      document.getElementById('selectedClaimDisplay').textContent = 'Claim: ' + state.selectedClaim;
+      showScreen(2);
+    });
+
+    document.getElementById('toMechanismBtn').addEventListener('click', () => {
+      if (!requireText('beliefReason', 80, 'Explain why this claim might sound believable.')) return;
+      if (!requireText('misleadingPart', 80, 'Explain what may be oversimplified, exaggerated, or misleading.')) return;
+      showScreen(3);
+    });
+
+    document.getElementById('toEvidenceBtn').addEventListener('click', () => {
+      if (state.selectedConcepts.length < 2) {
+        showFeedback('warning', 'Choose at least two concepts.', 'Select at least two physiology concepts that connect to this claim.');
+        return;
+      }
+      if (!requireText('mechanismExplanation', 120, 'Explain the biological mechanism using course concepts.')) return;
+      showScreen(4);
+    });
+
+    document.getElementById('toVerdictBtn').addEventListener('click', () => {
+      if (!getValue('evidenceSource')) {
+        showFeedback('warning', 'Choose a source type.', 'Select the strongest source type for evaluating the claim.');
+        return;
+      }
+      if (!getValue('evidenceRating')) {
+        showFeedback('warning', 'Choose an evidence rating.', 'Rate the quality of evidence for this claim.');
+        return;
+      }
+      if (!requireText('evidenceReason', 90, 'Explain why you rated the evidence this way.')) return;
+      showScreen(5);
+    });
+
+    document.getElementById('summaryBtn').addEventListener('click', () => {
+      if (!state.verdict) {
+        showFeedback('warning', 'Choose a verdict.', 'Select a final verdict before generating the summary.');
+        return;
+      }
+      if (!requireText('verdictReason', 120, 'Justify the final verdict with nuance and physiology.')) return;
+      if (!requireText('correctedClaim', 80, 'Rewrite the claim as a more accurate science-based message.')) return;
+
+      const summary = buildSummary();
+      summaryText.textContent = summary;
+      summaryOutput.classList.remove('hidden');
+      pdfBtn.classList.remove('hidden');
+      showFeedback('good', 'Submission Summary Generated', 'Your MythBusters PDF is ready to save and upload to Canvas.');
+    });
+
+    function buildSummary() {
+      return [
+        'The Great Carb MythBusters Completion Summary',
+        '=================================================',
+        '',
+        'Claim Investigated:',
+        state.selectedClaim,
+        '',
+        'Why This Claim Sounds Convincing:',
+        getValue('beliefReason'),
+        '',
+        'What May Be Misleading or Oversimplified:',
+        getValue('misleadingPart'),
+        '',
+        'Relevant Physiology Concepts:',
+        state.selectedConcepts.map((item) => '- ' + item).join('\n'),
+        '',
+        'Biological Mechanism Explanation:',
+        getValue('mechanismExplanation'),
+        '',
+        'Strongest Source Type for Evaluation:',
+        getValue('evidenceSource'),
+        '',
+        'Evidence Quality Rating:',
+        getValue('evidenceRating'),
+        '',
+        'Evidence Rating Explanation:',
+        getValue('evidenceReason'),
+        '',
+        'Final Verdict:',
+        state.verdict,
+        '',
+        'Verdict Justification:',
+        getValue('verdictReason'),
+        '',
+        'More Accurate Science-Based Message:',
+        getValue('correctedClaim')
+      ].join('\n');
+    }
+
+    pdfBtn.addEventListener('click', () => {
+      const content = summaryText.textContent || '';
+      if (!content.trim()) {
+        showFeedback('warning', 'Generate the summary first.', 'Please generate the submission summary before saving the PDF.');
+        return;
+      }
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showFeedback('warning', 'Pop-up blocked.', 'Allow pop-ups for this page and try again.');
+        return;
+      }
+      const pdfHtml = [
+        '<!DOCTYPE html>',
+        '<html lang="en">',
+        '<head>',
+        '<meta charset="UTF-8">',
+        '<title>Great Carb MythBusters Submission</title>',
+        '<style>',
+        'body { font-family: Arial, Helvetica, sans-serif; padding: 30px; line-height: 1.5; color: #222; }',
+        'h1 { color: #b23a48; }',
+        '.directions { background: #fdecef; border: 2px solid #b23a48; border-radius: 12px; padding: 16px; margin: 18px 0; }',
+        'pre { white-space: pre-wrap; border: 1px solid #ccc; border-radius: 12px; padding: 16px; background: #fafafa; }',
+        '@media print { .no-print { display: none; } body { padding: 12px; } }',
+        '</style>',
+        '</head>',
+        '<body>',
+        '<h1>The Great Carb MythBusters™</h1>',
+        '<div class="directions">',
+        '<h2>Canvas Submission Directions</h2>',
+        '<ol>',
+        '<li>Choose <strong>Save as PDF</strong> in the print window.</li>',
+        '<li>Save your file using this format: <strong>LastName_FirstName_CarbMythBusters.pdf</strong>.</li>',
+        '<li>Upload the PDF to the Canvas assignment.</li>',
+        '</ol>',
+        '</div>',
+        '<pre>' + escapeHtml(content) + '</pre>',
+        '<p class="no-print">Use your browser print dialog to save this page as a PDF.</p>',
+        '</body>',
+        '</html>'
+      ].join('');
+      printWindow.document.open();
+      printWindow.document.write(pdfHtml);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 250);
+    });
+
+    function runDeveloperTests() {
+      console.group('Great Carb MythBusters Tests');
+      console.assert(claims.length >= 5, 'Claim list has multiple options.');
+      console.assert(concepts.length >= 5, 'Concept list has multiple options.');
+      console.assert(verdicts.includes('Misleading'), 'Verdicts include misleading.');
+      console.assert(escapeHtml('<strong>test</strong>').includes('&lt;strong&gt;'), 'HTML escaping works.');
+      console.groupEnd();
+    }
+
+    renderStepper();
+    renderClaims();
+    renderConcepts();
+    renderVerdicts();
+    runDeveloperTests();
+  </script>
+</body>
+</html>
